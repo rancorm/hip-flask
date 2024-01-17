@@ -1,3 +1,5 @@
+from flask import url_for, current_app
+
 class HipExtension:
     """
     Hip Flask extension to simplify CSS and JavaScript integrations
@@ -5,7 +7,7 @@ class HipExtension:
 
     REL_STYLESHEET = "stylesheet"
     REL_ALTSHEET = "alternate stylesheet"
-    
+
     class Script:
         def __init__(self, src):
             self.src = src 
@@ -19,9 +21,11 @@ class HipExtension:
         def as_tag(self):
             return f"<script src=\"{self.src}\"></script>"
 
-    class Style:
-        def __init__(self, href):
+    class Link:
+        def __init__(self, href, rel, static=False):
             self.href = href
+            self.rel = rel
+            self.static = static
 
         def __str__(self):
             return self.href
@@ -30,11 +34,17 @@ class HipExtension:
             return self.href
 
         def as_tag(self):
-            return f"<link rel=\"stylesheet\" href=\"{self.href}\" />"
+            tag_url = self.href
+
+            if self.static:
+                tag_url = url_for('static', filename=self.href)
+
+            return f"<link rel=\"{self.rel}\" href=\"{tag_url}\" />"
 
     def __init__(self, app=None):
-        self.stylesheets = []
+        self.links = []
         self.scripts = []
+        self.metas = []
 
         if app is not None:
             self.init_app(app)
@@ -52,19 +62,29 @@ class HipExtension:
             app.jinja_env.globals['macros'] = {}
 
         app.jinja_env.globals['macros']['scripts'] = self._get_scripts
-        app.jinja_env.globals['macros']['styles'] = self._get_styles
+        app.jinja_env.globals['macros']['links'] = self._get_links
+        app.jinja_env.globals['macros']['metas'] = self._get_metas
 
-    def script(self, url):
-        script = self.Script(url)
-        self.scripts.append(script)
+    def script(self, src):
+        new_script = self.Script(src)
 
-    def style(self, url):
-        style = self.Style(url)
-        self.stylesheets.append(style)
+        self.scripts.append(new_script)
+
+    def link(self, href, rel=REL_STYLESHEET):
+        new_link = self.Link(href, rel)
+
+        self.links.append(new_link)
+
+    def static_link(self, filename, rel=REL_STYLESHEET):
+        new_static_link = self.Link(filename, rel, static=True)
+
+        self.links.append(new_static_link)
 
     def _get_scripts(self):
         return self.scripts
 
-    def _get_styles(self):
-        return self.stylesheets
+    def _get_links(self):
+        return self.links
 
+    def _get_metas(self):
+        return self.metas
