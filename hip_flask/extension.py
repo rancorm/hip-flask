@@ -262,9 +262,9 @@ class HipExtension:
         if 'macros' not in app.jinja_env.globals:
             app.jinja_env.globals['macros'] = {}
 
-        app.jinja_env.globals['macros']['scripts'] = self._get_scripts
-        app.jinja_env.globals['macros']['links'] = self._get_links
-        app.jinja_env.globals['macros']['metas'] = self._get_metas
+        app.jinja_env.globals['macros']['hip_scripts'] = self._get_scripts
+        app.jinja_env.globals['macros']['hip_links'] = self._get_links
+        app.jinja_env.globals['macros']['hip_metas'] = self._get_metas
 
     # Functions
     def meta(self,
