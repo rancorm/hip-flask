@@ -30,7 +30,7 @@ class HipExtension:
 
             # Explode content if dealing with a list
             if type(content) is list:
-                self.content = ", ".join(self.content)
+                self.content = ", ".join(content)
             else:
                 self.content = content
             
