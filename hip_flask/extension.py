@@ -5,6 +5,21 @@ class HipExtension:
     Hip Flask extension to simplify CSS and JavaScript integrations
     """
 
+    # Meta name values
+    META_APPLICATION_NAME = "application-name"
+    META_AUTHOR = "author"
+    META_DESCRIPTION = "description"
+    META_GENERATOR = "generator"
+    META_KEYWORDS = "keywords"
+    META_VIEWPORT = "viewport"
+    
+
+    # Meta HTTP equiv
+    META_HE_CONTENT_SP = "content-security-policy"
+    META_HE_CONTENT_TYPE = "content-type"
+    META_HE_DEFAULT_STYLE = "default-style"
+    META_HE_REFRESH = "refresh"
+
     # Relationship type
     REL_ALTERNATE = "alternate"
     REL_AUTHOR = "author"
@@ -22,10 +37,35 @@ class HipExtension:
     REL_SEARCH = "search"
     REL_STYLESHEET = "stylesheet"
 
+    # Referrer policy
+    RP_NO_REFERRER = "no-referrer"
+    RP_NO_REFERRER_DOWNGRADE = "no-referrer-when-downgrade"
+    RP_ORIGIN = "origin"
+    RP_ORIGIN_CROSS_ORIGIN = "origin-when-cross-origin"
+    RP_SAME_ORIGIN = "same-origin"
+    RP_STRICT_ORIGIN = "strict-origin"
+    RP_STRICT_ORIGIN_CROSS_ORIGIN = "strict-origin-when-cross-origin"
+    RP_UNSAFE_URL = "unsafe-url"
+
+    # Cross origin
+    CO_ANONYMOUS = "anonymous"
+    CO_USE_CREDENTIALS = "use-credentials"
+
+    # Script type
+    TYPE_TEXT_JAVASCRIPT = "text/javascript"
+
+
     class Meta:
         """Meta tag"""
 
-        def __init__(self, name, content=None, value=None, http_equiv=False):
+        # Meta attributes
+        META_CHARSET = "charset"
+        
+        def __init__(self,
+                     name,
+                     content=None,
+                     value=None,
+                     http_equiv=False):
             self.name = name
 
             # Explode content if dealing with a list
@@ -42,17 +82,17 @@ class HipExtension:
 
             meta_parts = [ "<meta " ]
 
-            # Build tag 
-            if self.value:
+            # Build tag
+            if self.value and self.name == self.META_CHARSET:
                 meta_parts.append(f"{self.name}=\"{self.value}\"")
             else:
-                # http-equiv or normal name=value tag
+                # http-equiv or normal name=value attributes
                 if self.http_equiv:
                     meta_parts.append(f"http-equiv=\"{self.name}\"")
                 else:
                     meta_parts.append(f"name=\"{self.name}\"")
 
-                # Content
+                # Add meta content
                 meta_parts.append(f"content=\"{self.content}\"")
 
             # Close tag
@@ -63,8 +103,12 @@ class HipExtension:
     class Script:
         """Script tag"""
 
-        def __init__(self, src, static=False):
+        def __init__(self,
+                     src,
+                     typ=None,
+                     static=False):
             self.src = src
+            self.typ = typ
             self.static = static
 
         def __str__(self):
@@ -76,12 +120,22 @@ class HipExtension:
         def as_tag(self):
             """HTML represention of script"""
 
-            return f"<script src=\"{self.src}\"></script>"
+            script_parts = ["<script "]
+            
+            if self.typ:
+                script_parts.append(f"type=\"{self.typ}\" ")
+
+            script_parts.append(f"src=\"{self.src}\"></script>")
+
+            return "".join(script_parts)
 
     class Link:
         """Link tag"""
 
-        def __init__(self, href, rel, static=False):
+        def __init__(self,
+                     href,
+                     rel,
+                     static=False):
             self.href = href
             self.rel = rel
             self.static = static
@@ -100,7 +154,8 @@ class HipExtension:
             # Hosting from static URL
             if self.static:
                 tag_url = url_for('static', filename=self.href)
-
+            
+            # String interpolation
             return f"<link rel=\"{self.rel}\" href=\"{tag_url}\" />"
 
     def __init__(self, app=None):
@@ -132,40 +187,67 @@ class HipExtension:
         app.jinja_env.globals['macros']['metas'] = self._get_metas
 
     # Functions
-    def meta(self, name, content=None, value=None):
+    def meta(self,
+             name,
+             content=None,
+             value=None,
+             http_equiv=False):
         """Add meta"""
 
-        new_meta = self.Meta(name, content=content, value=value)
+        # Meta (name=value or "name"=name and "content"=content)
+        # http_equiv for
+        new_meta = self.Meta(name,
+                             content=content,
+                             value=value,
+                             http_equiv=http_equiv)
 
         self.metas.append(new_meta)
 
-    def http_equiv(self, name, content=None):
+    def http_equiv(self,
+                   name,
+                   content=None):
         """Add meta (http-equiv)"""
 
-        new_meta_http = self.Meta(name, content=content, http_equiv=True)
+        # Meta HTTP equiv tag
+        self.meta(name, content=content, http_equiv=True)
 
-        self.metas.append(new_meta_http)
-
-    def script(self, src, static=False):
+    def script(self,
+               src,
+               typ=None,
+               static=False):
         """Add script"""
-
-        new_script = self.Script(src, static)
+        
+        # Script (src, type, static URLs or not)
+        new_script = self.Script(src, typ, static)
 
         self.scripts.append(new_script)
 
-    def link(self, href, rel=REL_STYLESHEET, static=False):
+    def static_script(self,
+                      src,
+                      typ=None):
+        """Add static script"""
+        
+        # Static script
+        self.script(src, typ, static=True)
+
+    def link(self,
+             href,
+             rel=REL_STYLESHEET,
+             static=False):
         """Add link"""
 
+        # Link (href, rel, static URLs or not)
         new_link = self.Link(href, rel, static)
 
         self.links.append(new_link)
 
-    def static_link(self, filename, rel=REL_STYLESHEET):
+    def static_link(self,
+                    filename,
+                    rel=REL_STYLESHEET):
         """Add static link"""
 
-        new_static_link = self.Link(filename, rel, static=True)
-
-        self.links.append(new_static_link)
+        # Static link to filename
+        self.link(filename, rel, static=True)
 
     # Internal functions
     def _get_scripts(self):
