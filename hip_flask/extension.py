@@ -13,22 +13,22 @@ class HipExtension:
         """Meta tag"""
 
         # Meta name values
-        META_APPLICATION_NAME = "application-name"
-        META_AUTHOR = "author"
-        META_DESCRIPTION = "description"
-        META_GENERATOR = "generator"
-        META_KEYWORDS = "keywords"
-        META_VIEWPORT = "viewport"
+        APPLICATION_NAME = "application-name"
+        AUTHOR = "author"
+        DESCRIPTION = "description"
+        GENERATOR = "generator"
+        KEYWORDS = "keywords"
+        VIEWPORT = "viewport"
 
         # Meta HTTP equiv
-        META_HE_CONTENT_SP = "content-security-policy"
-        META_HE_CONTENT_TYPE = "content-type"
-        META_HE_DEFAULT_STYLE = "default-style"
-        META_HE_REFRESH = "refresh"
+        HE_CONTENT_SP = "content-security-policy"
+        HE_CONTENT_TYPE = "content-type"
+        HE_DEFAULT_STYLE = "default-style"
+        HE_REFRESH = "refresh"
 
         # Meta name values
-        META_CHARSET = "charset"
-        
+        CHARSET = "charset"
+
         def __init__(self,
                      name,
                      content=None,
@@ -41,17 +41,26 @@ class HipExtension:
                 self.content = ", ".join(content)
             else:
                 self.content = content
-            
+
             self.value = value
             self.http_equiv = http_equiv
 
+            self._cache_meta = None
+
         def as_tag(self):
+            if self._cache_meta:
+                return self._cache_meta
+
+            self._cache_meta = self._as_tag()
+            return self._cache_meta
+            
+        def _as_tag(self):
             """HTML representation of meta"""
 
             meta_parts = [ "<meta " ]
 
             # Build tag
-            if self.value and self.name == self.META_CHARSET:
+            if self.value and self.name == self.CHARSET:
                 meta_parts.append(f"{self.name}=\"{self.value}\"")
             else:
                 # http-equiv or normal name=value attributes
@@ -82,10 +91,15 @@ class HipExtension:
         RP_UNSAFE_URL = "unsafe-url"
 
         # Script type
-        TYPE_TEXT_JAVASCRIPT = "text/javascript"
+        TYPE_MIME_JAVASCRIPT = "text/javascript"
         TYPE_IMPORTMAP = "importmap"
         TYPE_MODULE = "module"
         TYPE_SPECULATIONRULES = "speculationrules"
+
+        # Fetch priority
+        FP_HIGH = "high"
+        FP_LOW = "low"
+        FP_AUTO = "auto"
 
         def __init__(self,
                      src,
@@ -104,7 +118,10 @@ class HipExtension:
             self.defer = defer
             self.nomodule = nomodule
             self.policy = policy
+            self.priority = priority
             self.integrity = integrity
+
+            self._cache_script = None
 
         def __str__(self):
             return self.src
@@ -113,6 +130,15 @@ class HipExtension:
             return self.src
 
         def as_tag(self):
+            # Check for cache script tag
+            if self._cache_script:
+                return self._cache_script
+            
+            # Build tag and cache for future calls
+            self._cache_script = self._as_tag()
+            return self._cache_script
+            
+        def _as_tag(self):
             """HTML represention of script"""
 
             script_parts = ["<script "]
@@ -132,6 +158,14 @@ class HipExtension:
             # Nomodule attribute
             if self.nomodule:
                 script_parts.append("nomodule ")
+
+            # Referrer policy attribute
+            if self.policy:
+                script_parts.append(f"referrerpolicy=\"{self.policy}\" ")
+
+            # Fetch priority attribute
+            if self.priority:
+                script_parts.append(f"fetchpriority=\"{self.priority}\" ")
 
             # Integrity attribute
             if self.integrity:
@@ -175,6 +209,8 @@ class HipExtension:
             self.rel = rel
             self.static = static
 
+            self._cache_link = None
+
         def __str__(self):
             return self.href
 
@@ -182,6 +218,13 @@ class HipExtension:
             return self.href
 
         def as_tag(self):
+            if self._cache_link:
+                return self._cache_link
+
+            self._cache_link = self._as_tag()
+            return self._cache_link
+            
+        def _as_tag(self):
             """HTML represention of link"""
 
             # Hosting from static URL
@@ -199,6 +242,8 @@ class HipExtension:
         self.links = []
         self.scripts = []
         self.metas = []
+
+        self._cache_meta = None
 
         if app is not None:
             self._init_app(app)
