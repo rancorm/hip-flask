@@ -1,4 +1,5 @@
 from flask import url_for, current_app
+from markupsafe import Markup 
 
 class HipExtension:
     """
@@ -51,7 +52,7 @@ class HipExtension:
             if self._cache_meta:
                 return self._cache_meta
 
-            self._cache_meta = self._as_tag()
+            self._cache_meta = Markup(self._as_tag())
             return self._cache_meta
             
         def _as_tag(self):
@@ -135,7 +136,7 @@ class HipExtension:
                 return self._cache_script
             
             # Build tag and cache for future calls
-            self._cache_script = self._as_tag()
+            self._cache_script = Markup(self._as_tag())
             return self._cache_script
             
         def _as_tag(self):
@@ -221,7 +222,7 @@ class HipExtension:
             if self._cache_link:
                 return self._cache_link
 
-            self._cache_link = self._as_tag()
+            self._cache_link = Markup(self._as_tag())
             return self._cache_link
             
         def _as_tag(self):

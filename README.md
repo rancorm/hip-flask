@@ -51,7 +51,7 @@ Stylesheets:
 
 ```python
 {% block stylesheets %}
-{% for css in macros.hip_links() %}{{ css.as_tag()|safe }}{% endfor %}
+{% for css in macros.hip_links() %}{{ css.as_tag() }}{% endfor %}
 {% endblock %}
 ```
 
@@ -59,7 +59,7 @@ Meta tags:
 
 ```python
 {% block metas %}
-{% for meta in macros.hip_metas() %}{{ meta.as_tag()|safe }}{% endfor %}
+{% for meta in macros.hip_metas() %}{{ meta.as_tag() }}{% endfor %}
 {% endblock %}
 ```
 
