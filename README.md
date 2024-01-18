@@ -3,9 +3,9 @@
 Lightweight Flask extension to simplify the integration of CSS and JavaScript files
 into your applications.
 
-## How to start?
+## Start here 
 
-Install the extension with dependencies:
+Install the extension:
 
 ```sh
 pip install hip-flask
@@ -32,5 +32,7 @@ def create_app():
 ```
 
 ## Contributing
+
+You know the drill. Fork and get to work.
 
 ## Thanks
