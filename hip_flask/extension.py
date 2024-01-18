@@ -27,12 +27,18 @@ class HipExtension:
 
         def __init__(self, name, content=None, value=None, http_equiv=False):
             self.name = name
-            self.content = content
+
+            # Explode content if dealing with a list
+            if type(content) is list:
+                self.content = ", ".join(self.content)
+            else:
+                self.content = content
+            
             self.value = value
             self.http_equiv = http_equiv
 
         def as_tag(self):
-            """HTML representation of Meta"""
+            """HTML representation of meta"""
 
             meta_parts = [ "<meta " ]
 
@@ -68,7 +74,7 @@ class HipExtension:
             return self.src
 
         def as_tag(self):
-            """HTML represention of Script"""
+            """HTML represention of script"""
 
             return f"<script src=\"{self.src}\"></script>"
 
@@ -87,10 +93,11 @@ class HipExtension:
             return self.href
 
         def as_tag(self):
-            """HTML represention of Link"""
+            """HTML represention of link"""
 
             tag_url = self.href
-
+            
+            # Hosting from static URL
             if self.static:
                 tag_url = url_for('static', filename=self.href)
 
@@ -104,9 +111,9 @@ class HipExtension:
         self.metas = []
 
         if app is not None:
-            self.init_app(app)
+            self._init_app(app)
 
-    def init_app(self, app):
+    def _init_app(self, app):
         """Initialize extension on application"""
 
         if not hasattr(app, 'extensions'):
@@ -124,6 +131,7 @@ class HipExtension:
         app.jinja_env.globals['macros']['links'] = self._get_links
         app.jinja_env.globals['macros']['metas'] = self._get_metas
 
+    # Functions
     def meta(self, name, content=None, value=None):
         """Add meta"""
 
@@ -159,6 +167,7 @@ class HipExtension:
 
         self.links.append(new_static_link)
 
+    # Internal functions
     def _get_scripts(self):
         return self.scripts
 
