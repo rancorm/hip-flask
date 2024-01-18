@@ -291,6 +291,9 @@ class HipExtension:
         # Meta HTTP equiv tag
         self.meta(name, content=content, http_equiv=True)
 
+    def noscript(self, msg):
+        return f"<noscript>{msg}</noscript>"
+
     def script(self,
                src,
                typ=None,
