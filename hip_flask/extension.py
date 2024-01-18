@@ -5,60 +5,28 @@ class HipExtension:
     Hip Flask extension to simplify CSS and JavaScript integrations
     """
 
-    # Meta name values
-    META_APPLICATION_NAME = "application-name"
-    META_AUTHOR = "author"
-    META_DESCRIPTION = "description"
-    META_GENERATOR = "generator"
-    META_KEYWORDS = "keywords"
-    META_VIEWPORT = "viewport"
-    
-
-    # Meta HTTP equiv
-    META_HE_CONTENT_SP = "content-security-policy"
-    META_HE_CONTENT_TYPE = "content-type"
-    META_HE_DEFAULT_STYLE = "default-style"
-    META_HE_REFRESH = "refresh"
-
-    # Relationship type
-    REL_ALTERNATE = "alternate"
-    REL_AUTHOR = "author"
-    REL_DNS_PREFETCH = "dns-prefetch"
-    REL_HELP = "help"
-    REL_ICON = "icon"
-    REL_LICENSE = "license"
-    REL_NEXT = "next"
-    REL_PINGBACK = "pingback"
-    REL_PRECONNECT = "preconnect"
-    REL_PREFETCH = "prefetch"
-    REL_PRELOAD = "preload"
-    REL_PRERENDER = "prerender"
-    REL_PREV = "prev"
-    REL_SEARCH = "search"
-    REL_STYLESHEET = "stylesheet"
-
-    # Referrer policy
-    RP_NO_REFERRER = "no-referrer"
-    RP_NO_REFERRER_DOWNGRADE = "no-referrer-when-downgrade"
-    RP_ORIGIN = "origin"
-    RP_ORIGIN_CROSS_ORIGIN = "origin-when-cross-origin"
-    RP_SAME_ORIGIN = "same-origin"
-    RP_STRICT_ORIGIN = "strict-origin"
-    RP_STRICT_ORIGIN_CROSS_ORIGIN = "strict-origin-when-cross-origin"
-    RP_UNSAFE_URL = "unsafe-url"
-
     # Cross origin
     CO_ANONYMOUS = "anonymous"
     CO_USE_CREDENTIALS = "use-credentials"
 
-    # Script type
-    TYPE_TEXT_JAVASCRIPT = "text/javascript"
-
-
     class Meta:
         """Meta tag"""
 
-        # Meta attributes
+        # Meta name values
+        META_APPLICATION_NAME = "application-name"
+        META_AUTHOR = "author"
+        META_DESCRIPTION = "description"
+        META_GENERATOR = "generator"
+        META_KEYWORDS = "keywords"
+        META_VIEWPORT = "viewport"
+
+        # Meta HTTP equiv
+        META_HE_CONTENT_SP = "content-security-policy"
+        META_HE_CONTENT_TYPE = "content-type"
+        META_HE_DEFAULT_STYLE = "default-style"
+        META_HE_REFRESH = "refresh"
+
+        # Meta name values
         META_CHARSET = "charset"
         
         def __init__(self,
@@ -103,13 +71,40 @@ class HipExtension:
     class Script:
         """Script tag"""
 
+        # Referrer policy
+        RP_NO_REFERRER = "no-referrer"
+        RP_NO_REFERRER_DOWNGRADE = "no-referrer-when-downgrade"
+        RP_ORIGIN = "origin"
+        RP_ORIGIN_CROSS_ORIGIN = "origin-when-cross-origin"
+        RP_SAME_ORIGIN = "same-origin"
+        RP_STRICT_ORIGIN = "strict-origin"
+        RP_STRICT_ORIGIN_CROSS_ORIGIN = "strict-origin-when-cross-origin"
+        RP_UNSAFE_URL = "unsafe-url"
+
+        # Script type
+        TYPE_TEXT_JAVASCRIPT = "text/javascript"
+        TYPE_IMPORTMAP = "importmap"
+        TYPE_MODULE = "module"
+        TYPE_SPECULATIONRULES = "speculationrules"
+
         def __init__(self,
                      src,
                      typ=None,
-                     static=False):
+                     static=False,
+                     asyn=False,
+                     defer=False,
+                     nomodule=False,
+                     policy=None,
+                     priority=None,
+                     integrity=None):
             self.src = src
             self.typ = typ
             self.static = static
+            self.asyn = asyn
+            self.defer = defer
+            self.nomodule = nomodule
+            self.policy = policy
+            self.integrity = integrity
 
         def __str__(self):
             return self.src
@@ -121,16 +116,56 @@ class HipExtension:
             """HTML represention of script"""
 
             script_parts = ["<script "]
-            
+
+            # Type attribute
             if self.typ:
                 script_parts.append(f"type=\"{self.typ}\" ")
 
-            script_parts.append(f"src=\"{self.src}\"></script>")
+            # Async attribute
+            if self.asyn:
+                script_parts.append("async ")
+
+            # Defer attribute
+            if self.defer:
+                script_parts.append("defer ")
+
+            # Nomodule attribute
+            if self.nomodule:
+                script_parts.append("nomodule ")
+
+            # Integrity attribute
+            if self.integrity:
+                script_parts.append(f"integrity=\"{self.integrity}\" ")
+ 
+            # Hosting from static URL
+            if self.static:
+                script_src = url_for('static', filename=self.src)
+            else:
+                script_src = self.src
+
+            script_parts.append(f"src=\"{script_src}\"></script>")
 
             return "".join(script_parts)
 
     class Link:
         """Link tag"""
+
+        # Relationship type
+        REL_ALTERNATE = "alternate"
+        REL_AUTHOR = "author"
+        REL_DNS_PREFETCH = "dns-prefetch"
+        REL_HELP = "help"
+        REL_ICON = "icon"
+        REL_LICENSE = "license"
+        REL_NEXT = "next"
+        REL_PINGBACK = "pingback"
+        REL_PRECONNECT = "preconnect"
+        REL_PREFETCH = "prefetch"
+        REL_PRELOAD = "preload"
+        REL_PRERENDER = "prerender"
+        REL_PREV = "prev"
+        REL_SEARCH = "search"
+        REL_STYLESHEET = "stylesheet"
 
         def __init__(self,
                      href,
@@ -149,14 +184,14 @@ class HipExtension:
         def as_tag(self):
             """HTML represention of link"""
 
-            tag_url = self.href
-            
             # Hosting from static URL
             if self.static:
-                tag_url = url_for('static', filename=self.href)
-            
+                tag_href = url_for('static', filename=self.href)
+            else:
+                tag_href = self.href
+
             # String interpolation
-            return f"<link rel=\"{self.rel}\" href=\"{tag_url}\" />"
+            return f"<link rel=\"{self.rel}\" href=\"{tag_href}\" />"
 
     def __init__(self, app=None):
         """Initialize extension"""
@@ -232,7 +267,7 @@ class HipExtension:
 
     def link(self,
              href,
-             rel=REL_STYLESHEET,
+             rel=Link.REL_STYLESHEET,
              static=False):
         """Add link"""
 
@@ -243,7 +278,7 @@ class HipExtension:
 
     def static_link(self,
                     filename,
-                    rel=REL_STYLESHEET):
+                    rel=Link.REL_STYLESHEET):
         """Add static link"""
 
         # Static link to filename
