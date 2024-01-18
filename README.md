@@ -26,13 +26,41 @@ def create_app():
 
     hip = HipExtension(app)
 
+    # Meta tags
+    hip.meta(name="charset", value="utf-8")
+    hip.meta(name="description", content="Timeline event tracker")
+    hip.meta(name="keywords", content=["HTML", "CSS", "JavaScript"])
+    
+    # Stylesheets
     hip.link_static("css/hipapp.css")
+
+    # Scripts
+    hip.script_static("js/hipapp.js")
 
     @app.route('/hello')
     def hello():
         return 'Hello, World!'
 
     return app
+```
+
+In the template use macros `hip_links`, `hip_scripts`, or `hip_metas` to retrieve link,
+script, and meta tags respectively for use in the template:
+
+Stylesheets:
+
+```python
+{% block stylesheets %}
+{% for css in macros.hip_links() %}{{ css.as_tag()|safe }}{% endfor %}
+{% endblock %}
+```
+
+Meta tags:
+
+```python
+{% block metas %}
+{% for meta in macros.hip_metas() %}{{ meta.as_tag()|safe }}{% endfor %}
+{% endblock %}
 ```
 
 ## Contributing
