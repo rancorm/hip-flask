@@ -33,7 +33,6 @@ class HipExtension:
         def __init__(self,
                      name,
                      content=None,
-                     value=None,
                      http_equiv=False):
             self.name = name
 
@@ -43,7 +42,7 @@ class HipExtension:
             else:
                 self.content = content
 
-            self.value = value
+            # HTTP equiv tag
             self.http_equiv = http_equiv
 
             self._cache_meta = None
@@ -60,9 +59,9 @@ class HipExtension:
 
             meta_parts = [ "<meta " ]
 
-            # Build tag
-            if self.value and self.name == self.CHARSET:
-                meta_parts.append(f"{self.name}=\"{self.value}\"")
+            # Build tag, handle charset edge case
+            if self.name == self.CHARSET:
+                meta_parts.append(f"{self.name}=\"{self.content}\"")
             else:
                 # http-equiv or normal name=value attributes
                 if self.http_equiv:
@@ -271,15 +270,12 @@ class HipExtension:
     def meta(self,
              name,
              content=None,
-             value=None,
              http_equiv=False):
         """Add meta"""
 
-        # Meta (name=value or "name"=name and "content"=content)
-        # http_equiv for
+        # Meta tag
         new_meta = self.Meta(name,
                              content=content,
-                             value=value,
                              http_equiv=http_equiv)
 
         self.metas.append(new_meta)

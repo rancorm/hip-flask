@@ -27,7 +27,7 @@ def create_app():
     hip = HipExtension(app)
 
     # Meta tags
-    hip.meta(name="charset", value="utf-8")
+    hip.meta("charset", "utf-8")
     hip.meta(name="description", content="Timeline event tracker")
     hip.meta(name="keywords", content=["HTML", "CSS", "JavaScript"])
     
@@ -46,15 +46,6 @@ def create_app():
 
 In the template use macros `hip_links`, `hip_scripts`, or `hip_metas` to retrieve link,
 script, and meta tags respectively for use in the template:
-
-Note: The `.meta` call for `charset` uses `value` not `content`, this will result in the
-format:
-
-```html
-<meta charset="utf-8">
-```
-
-All other `.meta` calls use `name` and `content` arguments.
 
 ### Stylesheets
 
