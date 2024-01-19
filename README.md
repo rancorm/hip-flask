@@ -32,10 +32,10 @@ def create_app():
     hip.meta(name="keywords", content=["HTML", "CSS", "JavaScript"])
     
     # Stylesheets
-    hip.link_static("css/hipapp.css")
+    hip.static_link("css/hipapp.css")
 
     # Scripts
-    hip.script_static("js/hipapp.js")
+    hip.static_script("js/hipapp.js")
 
     @app.route('/hello')
     def hello():
