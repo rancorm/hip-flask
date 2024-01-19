@@ -47,6 +47,15 @@ def create_app():
 In the template use macros `hip_links`, `hip_scripts`, or `hip_metas` to retrieve link,
 script, and meta tags respectively for use in the template:
 
+Note: The `.meta` call for `charset` uses `value` not `content`, this will result in the
+format:
+
+```html
+<meta charset="utf-8">
+```
+
+All other `.meta` calls use `name` and `content` arguments.
+
 ### Stylesheets
 
 ```python
