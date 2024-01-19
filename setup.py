@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name="hip_flask",
-    version="0.1",
+    version_attr="hip_flask.__version__",
     packages=["hip_flask"],
     install_requires=[
         "Flask",
