@@ -47,7 +47,7 @@ def create_app():
 In the template use macros `hip_links`, `hip_scripts`, or `hip_metas` to retrieve link,
 script, and meta tags respectively for use in the template:
 
-Stylesheets:
+### Stylesheets
 
 ```python
 {% block stylesheets %}
@@ -55,7 +55,7 @@ Stylesheets:
 {% endblock %}
 ```
 
-Meta tags:
+### Meta tags
 
 ```python
 {% block metas %}
@@ -66,5 +66,3 @@ Meta tags:
 ## Contributing
 
 You know the drill. Fork and get to work.
-
-## Thanks
