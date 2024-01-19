@@ -45,7 +45,7 @@ def create_app():
 ```
 
 In the template use macros `hip_links`, `hip_scripts`, or `hip_metas` to retrieve link,
-script, and meta tags respectively for use in the template:
+script, and meta tags respectively for use in the template.
 
 ### Stylesheets
 

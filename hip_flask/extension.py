@@ -110,7 +110,8 @@ class HipExtension:
                      nomodule=False,
                      policy=None,
                      priority=None,
-                     integrity=None):
+                     integrity=None,
+                     crossorigin=None):
             self.src = src
             self.typ = typ
             self.static = static
@@ -120,6 +121,7 @@ class HipExtension:
             self.policy = policy
             self.priority = priority
             self.integrity = integrity
+            self.crossorigin = crossorigin
 
             self._cache_script = None
 
@@ -140,36 +142,6 @@ class HipExtension:
             
         def _as_tag(self):
             """HTML represention of script"""
-
-            script_parts = ["<script "]
-
-            # Type attribute
-            if self.typ:
-                script_parts.append(f"type=\"{self.typ}\" ")
-
-            # Async attribute
-            if self.asyn:
-                script_parts.append("async ")
-
-            # Defer attribute
-            if self.defer:
-                script_parts.append("defer ")
-
-            # Nomodule attribute
-            if self.nomodule:
-                script_parts.append("nomodule ")
-
-            # Referrer policy attribute
-            if self.policy:
-                script_parts.append(f"referrerpolicy=\"{self.policy}\" ")
-
-            # Fetch priority attribute
-            if self.priority:
-                script_parts.append(f"fetchpriority=\"{self.priority}\" ")
-
-            # Integrity attribute
-            if self.integrity:
-                script_parts.append(f"integrity=\"{self.integrity}\" ")
  
             # Hosting from static URL
             if self.static:
@@ -177,7 +149,41 @@ class HipExtension:
             else:
                 script_src = self.src
 
-            script_parts.append(f"src=\"{script_src}\"></script>")
+            script_parts = [f"<script src=\"{script_src}\""]
+
+            # Type attribute
+            if self.typ:
+                script_parts.append(f" type=\"{self.typ}\"")
+
+            # Async attribute
+            if self.asyn:
+                script_parts.append(" async")
+
+            # Defer attribute
+            if self.defer:
+                script_parts.append(" defer")
+
+            # Nomodule attribute
+            if self.nomodule:
+                script_parts.append(" nomodule")
+
+            # Referrer policy attribute
+            if self.policy:
+                script_parts.append(f" referrerpolicy=\"{self.policy}\"")
+
+            # Fetch priority attribute
+            if self.priority:
+                script_parts.append(f" fetchpriority=\"{self.priority}\"")
+
+            # Integrity attribute
+            if self.integrity:
+                script_parts.append(f" integrity=\"{self.integrity}\"")
+
+            # Cross origin attribute
+            if self.crossorigin:
+                script_parts.append(f" crossorigin=\"{self.crossorigin}\"")
+
+            script_parts.append(f"></script>")
 
             return "".join(script_parts)
 
@@ -294,11 +300,17 @@ class HipExtension:
     def script(self,
                src,
                typ=None,
-               static=False):
+               static=False,
+               integrity=None,
+               crossorigin=None):
         """Add script"""
         
         # Script (src, type, static URLs or not)
-        new_script = self.Script(src, typ, static)
+        new_script = self.Script(src,
+                                 typ,
+                                 static,
+                                 integrity=integrity,
+                                 crossorigin=crossorigin)
 
         self.scripts.append(new_script)
 
