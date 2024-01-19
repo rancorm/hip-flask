@@ -1,7 +1,7 @@
 # hip-flask
 
 <p align="center">
-    <img src="flask.svg" width="200" height="200" alt="Hip flask" />
+    <img src="https://raw.githubusercontent.com/rancorm/hip-flask/main/flask.svg" width="200" height="200" alt="Hip flask" />
 </p>
 
 Lightweight Flask extension to simplify the integration of CSS and JavaScript files
