@@ -260,6 +260,10 @@ class HipExtension:
             Integrity attribute
         crossorigin: str
             Cross origin attribute
+        sizes: str
+            Sizes attribute
+        media: str
+            Media attribute
         disabled: bool
             Disabled attribute
 
@@ -310,6 +314,8 @@ class HipExtension:
                      priority=None,
                      integrity=None,
                      crossorigin=None,
+                     sizes=None,
+                     media=None,
                      disabled=False):
             self.href = href
             self.rel = rel
@@ -320,7 +326,13 @@ class HipExtension:
             self.priority = priority
             self.crossorigin = crossorigin
             self.integrity = integrity
+            self.sizes = sizes
+            self.media = media
             self.disabled = disabled
+
+            # Check for preload link
+            if (rel == self.REL_PRELOAD) and not self.a:
+                raise ValueError("Preload link must have as attribute")
 
             self._cache_link = None
 
@@ -348,8 +360,10 @@ class HipExtension:
 
             link_parts = [f"<link href=\"{tag_href}\" rel=\"{self.rel}\""]
 
-            # As attribute
-            if self.a:
+            # As attribute (preload and modulepreload)
+            if self.a and self.rel == self.REL_PRELOAD:
+                link_parts.append(f" as=\"{self.a}\"")
+            elif self.a and self.rel == self.REL_MODULE_PRELOAD:
                 link_parts.append(f" as=\"{self.a}\"")
 
             # Type attribute
@@ -371,6 +385,14 @@ class HipExtension:
             # Fetch priority attribute
             if self.priority:
                 link_parts.append(f" fetchpriority=\"{self.priority}\"")
+
+            # Sizes attribute
+            if self.sizes:
+                link_parts.append(f" sizes=\"{self.sizes}\"")
+
+            # Media attribute
+            if self.media:
+                link_parts.append(f" media=\"{self.media}\"")
 
             # Disabled attribute
             if self.disabled:
@@ -496,6 +518,8 @@ class HipExtension:
              priority=None,
              integrity=None,
              crossorigin=None,
+             sizes=None,
+             media=None,
              disabled=False):
         """Add link"""
 
@@ -509,6 +533,8 @@ class HipExtension:
                              priority,
                              integrity,
                              crossorigin,
+                             sizes,
+                             media,
                              disabled)
 
         self.links.append(new_link)
@@ -522,6 +548,8 @@ class HipExtension:
                     priority=None,
                     integrity=None,
                     crossorigin=None,
+                    sizes=None,
+                    media=None,
                     disabled=False):
         """Add static link"""
 
@@ -535,6 +563,8 @@ class HipExtension:
                   priority,
                   integrity,
                   crossorigin,
+                  sizes,
+                  media,
                   disabled)
 
     # Internal functions
