@@ -27,7 +27,7 @@ def create_app():
     hip = HipExtension(app)
 
     # Meta tags
-    hip.meta("charset", "utf-8")
+    hip.meta(hip.Meta.CHARSET, "utf-8")
     hip.meta(name="description", content="Timeline event tracker")
     hip.meta(name="keywords", content=["HTML", "CSS", "JavaScript"])
     

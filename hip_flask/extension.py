@@ -12,6 +12,11 @@ class HipExtension:
     CO_ANONYMOUS = "anonymous"
     CO_USE_CREDENTIALS = "use-credentials"
 
+    # Fetch priority
+    FP_HIGH = "high"
+    FP_LOW = "low"
+    FP_AUTO = "auto"
+
     class Meta:
         """
         Class to represent a meta tag.
@@ -144,11 +149,6 @@ class HipExtension:
         TYPE_MODULE = "module"
         TYPE_SPECULATIONRULES = "speculationrules"
 
-        # Fetch priority
-        FP_HIGH = "high"
-        FP_LOW = "low"
-        FP_AUTO = "auto"
-
         def __init__(self,
                      src,
                      typ=None,
@@ -272,13 +272,39 @@ class HipExtension:
         REL_SEARCH = "search"
         REL_STYLESHEET = "stylesheet"
 
+        # As type
+        AS_AUDIO = "audio"
+        AS_DOCUMENT = "document"
+        AS_EMBED = "embed"
+        AS_FETCH = "fetch"
+        AS_FONT = "font"
+        AS_IMAGE = "image"
+        AS_OBJECT = "object"
+        AS_SCRIPT = "script"
+        AS_STYLE = "style"
+        AS_TRACK = "track"
+        AS_VIDEO = "video"
+        AS_WORKER = "worker"
+
         def __init__(self,
                      href,
                      rel,
-                     static=False):
+                     static=False,
+                     a=None,
+                     typ=None,
+                     priority=None,
+                     crossorigin=None,
+                     integrity=None,
+                     disabled=False):
             self.href = href
             self.rel = rel
             self.static = static
+            self.a = a 
+            self.typ = typ
+            self.priority = priority
+            self.crossorigin = crossorigin
+            self.integrity = integrity
+            self.disabled = disabled
 
             self._cache_link = None
 
@@ -304,8 +330,36 @@ class HipExtension:
             else:
                 tag_href = self.href
 
-            # String interpolation
-            return f"<link rel=\"{self.rel}\" href=\"{tag_href}\" />"
+            link_parts = [f"<link rel=\"{self.rel}\" href=\"{tag_href}\""]
+
+            # As attribute
+            if self.a:
+                link_parts.append(f" as=\"{self.a}\"")
+
+            # Type attribute
+            if self.typ:
+                link_parts.append(f" type=\"{self.typ}\"")
+
+            # Cross origin attribute
+            if self.crossorigin:
+                link_parts.append(f" crossorigin=\"{self.crossorigin}\"")
+
+            # Integrity attribute
+            if self.integrity:
+                link_parts.append(f" integrity=\"{self.integrity}\"")
+
+            # Fetch priority attribute
+            if self.priority:
+                link_parts.append(f" fetchpriority=\"{self.priority}\"")
+
+            # Disabled attribute
+            if self.disabled:
+                link_parts.append(" disabled")
+
+            # Close tag
+            link_parts.append(" />")
+
+            return "".join(link_parts)
 
     def __init__(self, app=None):
         """Initialize extension"""
@@ -347,8 +401,8 @@ class HipExtension:
         # Meta tag, http-equiv or normal name=value attributes
         # If name is charset, content is the charset.
         new_meta = self.Meta(name,
-                             content=content,
-                             http_equiv=http_equiv)
+                             content,
+                             http_equiv)
 
         self.metas.append(new_meta)
 
@@ -358,7 +412,7 @@ class HipExtension:
         """Add meta (http-equiv)"""
 
         # Meta HTTP equiv tag
-        self.meta(name, content=content, http_equiv=True)
+        self.meta(name, content, True)
 
     def noscript(self, msg):
         """Add noscript"""
@@ -377,8 +431,8 @@ class HipExtension:
         new_script = self.Script(src,
                                  typ,
                                  static,
-                                 integrity=integrity,
-                                 crossorigin=crossorigin)
+                                 integrity,
+                                 crossorigin)
 
         self.scripts.append(new_script)
 
@@ -388,26 +442,51 @@ class HipExtension:
         """Add static script"""
 
         # Static script
-        self.script(src, typ, static=True)
+        self.script(src,
+                    typ,
+                    True)
 
     def link(self,
              href,
              rel=Link.REL_STYLESHEET,
-             static=False):
+             static=False,
+             a=None,
+             typ=None,
+             crossorigin=None,
+             integrity=None,
+             disabled=False):
         """Add link"""
 
         # Link (href, rel, static URLs or not)
-        new_link = self.Link(href, rel, static)
+        new_link = self.Link(href,
+                             rel,
+                             static,
+                             typ,
+                             crossorigin,
+                             integrity,
+                             disabled)
 
         self.links.append(new_link)
 
     def static_link(self,
                     filename,
-                    rel=Link.REL_STYLESHEET):
+                    rel=Link.REL_STYLESHEET,
+                    a=None,
+                    typ=None,
+                    crossorigin=None,
+                    integrity=None,
+                    disabled=False):
         """Add static link"""
 
         # Static link to filename
-        self.link(filename, rel, static=True)
+        self.link(filename,
+                  rel,
+                  True,
+                  a,
+                  typ,
+                  crossorigin,
+                  integrity,
+                  disabled)
 
     # Internal functions
     def _get_scripts(self):
