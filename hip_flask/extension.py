@@ -350,6 +350,7 @@ class HipExtension:
             if self.integrity:
                 link_parts.append(f" integrity=\"{self.integrity}\"")
 
+            # Referrer policy attribute
             if self.policy:
                 link_parts.append(f" referrerpolicy=\"{self.policy}\"")
 
@@ -451,13 +452,25 @@ class HipExtension:
 
     def static_script(self,
                       src,
-                      typ=None):
+                      typ=None,
+                      asyn=False,
+                      defer=False,
+                      policy=None,
+                      priority=None,
+                      integrity=None,
+                      crossorigin=None):
         """Add static script"""
 
         # Static script
         self.script(src,
                     typ,
-                    True)
+                    True,
+                    asyn,
+                    defer,
+                    policy,
+                    priority,
+                    integrity,
+                    crossorigin)
 
     def link(self,
              href,
