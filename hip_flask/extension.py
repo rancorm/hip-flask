@@ -17,6 +17,16 @@ class HipExtension:
     FP_LOW = "low"
     FP_AUTO = "auto"
 
+    # Referrer policy
+    RP_NO_REFERRER = "no-referrer"
+    RP_NO_REFERRER_DOWNGRADE = "no-referrer-when-downgrade"
+    RP_ORIGIN = "origin"
+    RP_ORIGIN_CROSS_ORIGIN = "origin-when-cross-origin"
+    RP_SAME_ORIGIN = "same-origin"
+    RP_STRICT_ORIGIN = "strict-origin"
+    RP_STRICT_ORIGIN_CROSS_ORIGIN = "strict-origin-when-cross-origin"
+    RP_UNSAFE_URL = "unsafe-url"
+
     class Meta:
         """
         Class to represent a meta tag.
@@ -132,17 +142,7 @@ class HipExtension:
         as_tag():
             Returns HTML script tag.
         """
-
-        # Referrer policy
-        RP_NO_REFERRER = "no-referrer"
-        RP_NO_REFERRER_DOWNGRADE = "no-referrer-when-downgrade"
-        RP_ORIGIN = "origin"
-        RP_ORIGIN_CROSS_ORIGIN = "origin-when-cross-origin"
-        RP_SAME_ORIGIN = "same-origin"
-        RP_STRICT_ORIGIN = "strict-origin"
-        RP_STRICT_ORIGIN_CROSS_ORIGIN = "strict-origin-when-cross-origin"
-        RP_UNSAFE_URL = "unsafe-url"
-
+            
         # Script type
         TYPE_MIME_JAVASCRIPT = "text/javascript"
         TYPE_IMPORTMAP = "importmap"
@@ -292,15 +292,17 @@ class HipExtension:
                      static=False,
                      a=None,
                      typ=None,
+                     policy=None,
                      priority=None,
-                     crossorigin=None,
                      integrity=None,
+                     crossorigin=None,
                      disabled=False):
             self.href = href
             self.rel = rel
             self.static = static
             self.a = a 
             self.typ = typ
+            self.policy = policy
             self.priority = priority
             self.crossorigin = crossorigin
             self.integrity = integrity
@@ -330,7 +332,7 @@ class HipExtension:
             else:
                 tag_href = self.href
 
-            link_parts = [f"<link rel=\"{self.rel}\" href=\"{tag_href}\""]
+            link_parts = [f"<link href=\"{tag_href}\" rel=\"{self.rel}\""]
 
             # As attribute
             if self.a:
@@ -347,6 +349,9 @@ class HipExtension:
             # Integrity attribute
             if self.integrity:
                 link_parts.append(f" integrity=\"{self.integrity}\"")
+
+            if self.policy:
+                link_parts.append(f" referrerpolicy=\"{self.policy}\"")
 
             # Fetch priority attribute
             if self.priority:
@@ -423,6 +428,10 @@ class HipExtension:
                src,
                typ=None,
                static=False,
+               asyn=False,
+               defer=False,
+               policy=None,
+               priority=None,
                integrity=None,
                crossorigin=None):
         """Add script"""
@@ -431,6 +440,10 @@ class HipExtension:
         new_script = self.Script(src,
                                  typ,
                                  static,
+                                 asyn,
+                                 defer,
+                                 policy,
+                                 priority,
                                  integrity,
                                  crossorigin)
 
@@ -452,8 +465,10 @@ class HipExtension:
              static=False,
              a=None,
              typ=None,
-             crossorigin=None,
+             policy=None,
+             priority=None,
              integrity=None,
+             crossorigin=None,
              disabled=False):
         """Add link"""
 
@@ -461,9 +476,12 @@ class HipExtension:
         new_link = self.Link(href,
                              rel,
                              static,
+                             a,
                              typ,
-                             crossorigin,
+                             policy,
+                             priority,
                              integrity,
+                             crossorigin,
                              disabled)
 
         self.links.append(new_link)
@@ -473,8 +491,10 @@ class HipExtension:
                     rel=Link.REL_STYLESHEET,
                     a=None,
                     typ=None,
-                    crossorigin=None,
+                    policy=None,
+                    priority=None,
                     integrity=None,
+                    crossorigin=None,
                     disabled=False):
         """Add static link"""
 
@@ -484,8 +504,10 @@ class HipExtension:
                   True,
                   a,
                   typ,
-                  crossorigin,
+                  policy,
+                  priority,
                   integrity,
+                  crossorigin,
                   disabled)
 
     # Internal functions
