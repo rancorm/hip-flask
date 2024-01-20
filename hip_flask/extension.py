@@ -248,6 +248,20 @@ class HipExtension:
             Link relelationship
         static: bool
             Static URL tag
+        a: str
+            As attribute
+        typ: str
+            Type attribute
+        policy: str
+            Referrer policy attribute
+        priority: str
+            Fetch priority attribute
+        integrity: str
+            Integrity attribute
+        crossorigin: str
+            Cross origin attribute
+        disabled: bool
+            Disabled attribute
 
         Methods
         -------
