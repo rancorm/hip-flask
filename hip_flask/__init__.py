@@ -1,4 +1,4 @@
-"""Hip Flask extension"""
+"""Hip Flask"""
 
 from .extension import HipExtension
 

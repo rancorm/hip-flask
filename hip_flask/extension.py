@@ -1,5 +1,7 @@
-from flask import url_for, current_app
-from markupsafe import Markup 
+"""Hip Flask extension"""
+
+from flask import url_for
+from markupsafe import Markup
 
 class HipExtension:
     """
@@ -11,7 +13,23 @@ class HipExtension:
     CO_USE_CREDENTIALS = "use-credentials"
 
     class Meta:
-        """Meta tag"""
+        """
+        Class to represent a meta tag.
+
+        Attributes
+        ----------
+        name: str
+            name of meta tag
+        content: str
+            content of meta tag
+        http_equiv: bool
+            HTTP equiv tag
+
+        Methods
+        -------
+        as_tag():
+            Returns HTML meta tag.
+        """
 
         # Meta name values
         APPLICATION_NAME = "application-name"
@@ -37,7 +55,7 @@ class HipExtension:
             self.name = name
 
             # Explode content if dealing with a list
-            if type(content) is list:
+            if isinstance(content, list):
                 self.content = ", ".join(content)
             else:
                 self.content = content
@@ -48,15 +66,15 @@ class HipExtension:
             self._cache_meta = None
 
         def as_tag(self):
+            """HTML representation of meta"""
+
             if self._cache_meta:
                 return self._cache_meta
 
             self._cache_meta = Markup(self._as_tag())
             return self._cache_meta
-            
-        def _as_tag(self):
-            """HTML representation of meta"""
 
+        def _as_tag(self):
             meta_parts = [ "<meta " ]
 
             # Build tag, handle charset edge case
@@ -78,7 +96,37 @@ class HipExtension:
             return "".join(meta_parts)
 
     class Script:
-        """Script tag"""
+        """
+        Class to represent a script tag.  
+
+        Attributes
+        ----------
+        src: str
+            Script src
+        typ: str
+            Script type
+        static: bool
+            Static URL tag
+        asyn: bool
+            Async attribute
+        defer: bool
+            Defer attribute
+        nomodule: bool
+            Nomodule attribute
+        policy: str
+            Referrer policy attribute
+        priority: str
+            Fetch priority attribute
+        integrity: str
+            Integrity attribute
+        crossorigin: str
+            Cross origin attribute
+
+        Methods
+        -------
+        as_tag():
+            Returns HTML script tag.
+        """
 
         # Referrer policy
         RP_NO_REFERRER = "no-referrer"
@@ -132,17 +180,17 @@ class HipExtension:
             return self.src
 
         def as_tag(self):
+            """HTML represention of script"""
+
             # Check for cache script tag
             if self._cache_script:
                 return self._cache_script
-            
+
             # Build tag and cache for future calls
             self._cache_script = Markup(self._as_tag())
             return self._cache_script
-            
+
         def _as_tag(self):
-            """HTML represention of script"""
- 
             # Hosting from static URL
             if self.static:
                 script_src = url_for('static', filename=self.src)
@@ -183,12 +231,29 @@ class HipExtension:
             if self.crossorigin:
                 script_parts.append(f" crossorigin=\"{self.crossorigin}\"")
 
+            # Close tag
             script_parts.append(f"></script>")
 
             return "".join(script_parts)
 
     class Link:
-        """Link tag"""
+        """
+        Class to represent a link tag.  
+
+        Attributes
+        ----------
+        href: str
+            Link href
+        rel: str
+            Link relelationship
+        static: bool
+            Static URL tag
+
+        Methods
+        -------
+        as_tag():
+            Returns HTML link tag.
+        """
 
         # Relationship type
         REL_ALTERNATE = "alternate"
@@ -224,15 +289,15 @@ class HipExtension:
             return self.href
 
         def as_tag(self):
+            """HTML represention of link"""
+
             if self._cache_link:
                 return self._cache_link
 
             self._cache_link = Markup(self._as_tag())
             return self._cache_link
-            
-        def _as_tag(self):
-            """HTML represention of link"""
 
+        def _as_tag(self):
             # Hosting from static URL
             if self.static:
                 tag_href = url_for('static', filename=self.href)
@@ -279,7 +344,8 @@ class HipExtension:
              http_equiv=False):
         """Add meta"""
 
-        # Meta tag
+        # Meta tag, http-equiv or normal name=value attributes
+        # If name is charset, content is the charset.
         new_meta = self.Meta(name,
                              content=content,
                              http_equiv=http_equiv)
@@ -295,6 +361,8 @@ class HipExtension:
         self.meta(name, content=content, http_equiv=True)
 
     def noscript(self, msg):
+        """Add noscript"""
+
         return f"<noscript>{msg}</noscript>"
 
     def script(self,
@@ -304,7 +372,7 @@ class HipExtension:
                integrity=None,
                crossorigin=None):
         """Add script"""
-        
+
         # Script (src, type, static URLs or not)
         new_script = self.Script(src,
                                  typ,
@@ -318,7 +386,7 @@ class HipExtension:
                       src,
                       typ=None):
         """Add static script"""
-        
+
         # Static script
         self.script(src, typ, static=True)
 
