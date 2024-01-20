@@ -316,6 +316,8 @@ class HipExtension:
                      crossorigin=None,
                      sizes=None,
                      media=None,
+                     lang=None,
+                     title=None,
                      disabled=False):
             self.href = href
             self.rel = rel
@@ -328,11 +330,19 @@ class HipExtension:
             self.integrity = integrity
             self.sizes = sizes
             self.media = media
+            # Values for hreflang attribute are specified using language tags as
+            # defined in BCP 47
+            self.lang = lang
+            self.title = title
             self.disabled = disabled
 
             # Check for preload link
             if (rel == self.REL_PRELOAD) and not self.a:
                 raise ValueError("Preload link must have as attribute")
+
+            # Hreflang requires ref attribute
+            if self.lang and not self.ref:
+                raise ValueError("Lang must have ref attribute")
 
             self._cache_link = None
 
@@ -394,6 +404,14 @@ class HipExtension:
             if self.media:
                 link_parts.append(f" media=\"{self.media}\"")
 
+            # Hreflang attribute
+            if self.lang:
+                link_parts.append(f" hreflang=\"{self.lang}\"")
+
+            # Title attribute
+            if self.title:
+                link_parts.append(f" title=\"{self.title}\"")
+
             # Disabled attribute
             if self.disabled:
                 link_parts.append(" disabled")
@@ -425,10 +443,11 @@ class HipExtension:
         app.extensions['hip'] = self
         app.hip = self
 
-        # Register the macros with the Jinja environment
+        # Add macros to Jinja globals
         if 'macros' not in app.jinja_env.globals:
             app.jinja_env.globals['macros'] = {}
 
+        # Register macros
         app.jinja_env.globals['macros']['hip_scripts'] = self._get_scripts
         app.jinja_env.globals['macros']['hip_links'] = self._get_links
         app.jinja_env.globals['macros']['hip_metas'] = self._get_metas
@@ -520,6 +539,8 @@ class HipExtension:
              crossorigin=None,
              sizes=None,
              media=None,
+             lang=None,
+             title=None,
              disabled=False):
         """Add link"""
 
@@ -535,6 +556,8 @@ class HipExtension:
                              crossorigin,
                              sizes,
                              media,
+                             lang,
+                             title,
                              disabled)
 
         self.links.append(new_link)
@@ -550,6 +573,8 @@ class HipExtension:
                     crossorigin=None,
                     sizes=None,
                     media=None,
+                    lang=None,
+                    title=None,
                     disabled=False):
         """Add static link"""
 
@@ -565,6 +590,8 @@ class HipExtension:
                   crossorigin,
                   sizes,
                   media,
+                  lang,
+                  title,
                   disabled)
 
     # Internal functions
