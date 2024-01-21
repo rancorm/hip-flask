@@ -35,7 +35,7 @@ class HipExtension:
         ----------
         name: str
             name of meta tag
-        content: str
+        content: str or list
             content of meta tag
         http_equiv: bool
             HTTP equiv tag
@@ -142,7 +142,7 @@ class HipExtension:
         as_tag():
             Returns HTML script tag.
         """
-            
+
         # Script type
         TYPE_MIME_JAVASCRIPT = "text/javascript"
         TYPE_IMPORTMAP = "importmap"
@@ -244,14 +244,14 @@ class HipExtension:
         ----------
         href: str
             Link href
-        rel: str
+        rel: str or list
             Link relelationship
         static: bool
             Static URL tag
         a: str
             As attribute
         typ: str
-            Type attribute
+            Type attribute (recommended practice is to omit)
         policy: str
             Referrer policy attribute
         priority: str
@@ -289,6 +289,13 @@ class HipExtension:
         REL_PREV = "prev"
         REL_SEARCH = "search"
         REL_STYLESHEET = "stylesheet"
+        REL_CANONICAL = "canonical"
+        REL_MANIFEST = "manifest"
+        REL_ME = "me"
+        REL_MODULE_PRELOAD = "modulepreload"
+        REL_PRIVACY_POLICY = "privacy-policy"
+        REL_TERMS_OF_SERVICE = "terms-of-service"
+        REL_TOS = REL_TERMS_OF_SERVICE
 
         # As type
         AS_AUDIO = "audio"
@@ -304,6 +311,21 @@ class HipExtension:
         AS_VIDEO = "video"
         AS_WORKER = "worker"
 
+        # Link type
+        TYPE_MIME_ATOM = "application/atom+xml"
+        TYPE_MIME_HTML = "text/html"
+        TYPE_MIME_CSS = "text/css"
+        TYPE_MIME_RSS = "application/rss+xml"
+        TYPE_MIME_PDF = "application/pdf"
+        TYPE_MIME_PNG = "image/png"
+        TYPE_MIME_JPEG = "image/jpeg"
+        TYPE_MIME_GIF = "image/gif"
+        TYPE_MIME_SVG = "image/svg+xml"
+        TYPE_MINE_WOFF2 = "font/woff2"
+
+        # Blocking operations
+        BLOCK_RENDER = "render"
+
         def __init__(self,
                      href,
                      rel,
@@ -318,9 +340,16 @@ class HipExtension:
                      media=None,
                      lang=None,
                      title=None,
+                     block=None,
                      disabled=False):
             self.href = href
-            self.rel = rel
+
+            # Explode rel if dealing with a list
+            if isinstance(rel, list):
+                self.rel = " ".join(rel)
+            else:
+                self.rel = rel
+
             self.static = static
             self.a = a 
             self.typ = typ
@@ -330,15 +359,23 @@ class HipExtension:
             self.integrity = integrity
             self.sizes = sizes
             self.media = media
+
             # Values for hreflang attribute are specified using language tags as
             # defined in BCP 47
             self.lang = lang
             self.title = title
+
+            # Explode block if dealing with a list
+            if isinstance(block, list):
+                self.block = " ".join(block)
+            else:
+                self.block = block
+
             self.disabled = disabled
 
-            # Check for preload link
+            # Check for preload and as attribute
             if (rel == self.REL_PRELOAD) and not self.a:
-                raise ValueError("Preload link must have as attribute")
+                raise ValueError("Preload link must have 'as' attribute")
 
             # Hreflang requires ref attribute
             if self.lang and not self.ref:
@@ -411,6 +448,10 @@ class HipExtension:
             # Title attribute
             if self.title:
                 link_parts.append(f" title=\"{self.title}\"")
+
+            # Block attribute
+            if self.block:
+                link_parts.append(f" block=\"{self.block}\"")
 
             # Disabled attribute
             if self.disabled:
@@ -541,6 +582,7 @@ class HipExtension:
              media=None,
              lang=None,
              title=None,
+             block=None,
              disabled=False):
         """Add link"""
 
@@ -558,6 +600,7 @@ class HipExtension:
                              media,
                              lang,
                              title,
+                             block,
                              disabled)
 
         self.links.append(new_link)
@@ -575,6 +618,7 @@ class HipExtension:
                     media=None,
                     lang=None,
                     title=None,
+                    block=None,
                     disabled=False):
         """Add static link"""
 
@@ -592,6 +636,7 @@ class HipExtension:
                   media,
                   lang,
                   title,
+                  block,
                   disabled)
 
     # Internal functions
