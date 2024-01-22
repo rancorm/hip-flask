@@ -80,6 +80,10 @@ class HipExtension:
 
             self._cache_meta = None
 
+        def __contains__(self, item):
+            # Define the logic to check if the item is in the container
+            return item is self.name
+
         def as_tag(self):
             """HTML representation of meta"""
 
@@ -178,6 +182,10 @@ class HipExtension:
 
         def __repr__(self):
             return self.src
+
+        def __contains__(self, item):
+            # Define the logic to check if the item is in the container
+            return item is self.src
 
         def as_tag(self):
             """HTML represention of script"""
@@ -388,6 +396,10 @@ class HipExtension:
 
         def __repr__(self):
             return self.href
+
+        def __contains__(self, item):
+            # Define the logic to check if the item is in the container
+            return item is self.href
 
         def as_tag(self):
             """HTML represention of link"""
