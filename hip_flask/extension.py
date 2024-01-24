@@ -71,6 +71,7 @@ class HipExtension:
                      charset=None,
                      http_equiv=False):
             self.name = name
+            self.charset = charset
 
             if not self.name and not self.charset:
                 raise ValueError("Meta tag must have name or charset")
@@ -80,8 +81,6 @@ class HipExtension:
                 self.content = ", ".join(content)
             else:
                 self.content = content
-
-            self.charset = charset
 
             # HTTP equiv tag
             self.http_equiv = http_equiv
