@@ -21,10 +21,10 @@ class HipExtension:
     RP_NO_REFERRER = "no-referrer"
     RP_NO_REFERRER_DOWNGRADE = "no-referrer-when-downgrade"
     RP_ORIGIN = "origin"
-    RP_ORIGIN_CROSS_ORIGIN = "origin-when-cross-origin"
+    RP_ORIGIN_CO = "origin-when-cross-origin"
     RP_SAME_ORIGIN = "same-origin"
     RP_STRICT_ORIGIN = "strict-origin"
-    RP_STRICT_ORIGIN_CROSS_ORIGIN = "strict-origin-when-cross-origin"
+    RP_STRICT_ORIGIN_CO = "strict-origin-when-cross-origin"
     RP_UNSAFE_URL = "unsafe-url"
 
     class Meta:
@@ -37,6 +37,8 @@ class HipExtension:
             name of meta tag
         content: str or list
             content of meta tag
+        charset: str
+            charset of meta tag
         http_equiv: bool
             HTTP equiv tag
 
@@ -61,19 +63,25 @@ class HipExtension:
         HE_REFRESH = "refresh"
 
         # Meta name values
-        CHARSET = "charset"
+        CHARSET_UTF8 = "utf-8"
 
         def __init__(self,
-                     name,
+                     name=None,
                      content=None,
+                     charset=None,
                      http_equiv=False):
             self.name = name
+
+            if not self.name and not self.charset:
+                raise ValueError("Meta tag must have name or charset")
 
             # Explode content if dealing with a list
             if isinstance(content, list):
                 self.content = ", ".join(content)
             else:
                 self.content = content
+
+            self.charset = charset
 
             # HTTP equiv tag
             self.http_equiv = http_equiv
@@ -96,9 +104,9 @@ class HipExtension:
         def _as_tag(self):
             meta_parts = [ "<meta " ]
 
-            # Build tag, handle charset edge case
-            if self.name == self.CHARSET:
-                meta_parts.append(f"{self.name}=\"{self.content}\"")
+            # Build tag parts
+            if self.charset:
+                meta_parts.append(f"charset=\"{self.charset}\"")
             else:
                 # http-equiv or normal name=value attributes
                 if self.http_equiv:
@@ -148,7 +156,7 @@ class HipExtension:
         """
 
         # Script type
-        TYPE_MIME_JAVASCRIPT = "text/javascript"
+        TYPE_JAVASCRIPT = "text/javascript"
         TYPE_IMPORTMAP = "importmap"
         TYPE_MODULE = "module"
         TYPE_SPECULATIONRULES = "speculationrules"
@@ -207,35 +215,28 @@ class HipExtension:
 
             script_parts = [f"<script src=\"{script_src}\""]
 
-            # Type attribute
+            # Handle attributes
             if self.typ:
                 script_parts.append(f" type=\"{self.typ}\"")
 
-            # Async attribute
             if self.asyn:
                 script_parts.append(" async")
 
-            # Defer attribute
             if self.defer:
                 script_parts.append(" defer")
 
-            # Nomodule attribute
             if self.nomodule:
                 script_parts.append(" nomodule")
 
-            # Referrer policy attribute
             if self.policy:
                 script_parts.append(f" referrerpolicy=\"{self.policy}\"")
 
-            # Fetch priority attribute
             if self.priority:
                 script_parts.append(f" fetchpriority=\"{self.priority}\"")
 
-            # Integrity attribute
             if self.integrity:
                 script_parts.append(f" integrity=\"{self.integrity}\"")
 
-            # Cross origin attribute
             if self.crossorigin:
                 script_parts.append(f" crossorigin=\"{self.crossorigin}\"")
 
@@ -320,16 +321,16 @@ class HipExtension:
         AS_WORKER = "worker"
 
         # Link type
-        TYPE_MIME_ATOM = "application/atom+xml"
-        TYPE_MIME_HTML = "text/html"
-        TYPE_MIME_CSS = "text/css"
-        TYPE_MIME_RSS = "application/rss+xml"
-        TYPE_MIME_PDF = "application/pdf"
-        TYPE_MIME_PNG = "image/png"
-        TYPE_MIME_JPEG = "image/jpeg"
-        TYPE_MIME_GIF = "image/gif"
-        TYPE_MIME_SVG = "image/svg+xml"
-        TYPE_MINE_WOFF2 = "font/woff2"
+        TYPE_ATOM = "application/atom+xml"
+        TYPE_HTML = "text/html"
+        TYPE_CSS = "text/css"
+        TYPE_RSS = "application/rss+xml"
+        TYPE_PDF = "application/pdf"
+        TYPE_PNG = "image/png"
+        TYPE_JPEG = "image/jpeg"
+        TYPE_GIF = "image/gif"
+        TYPE_SVG = "image/svg+xml"
+        TYPE_WOFF2 = "font/woff2"
 
         # Blocking operations
         BLOCK_RENDER = "render"
@@ -425,47 +426,37 @@ class HipExtension:
             elif self.a and self.rel == self.REL_MODULE_PRELOAD:
                 link_parts.append(f" as=\"{self.a}\"")
 
-            # Type attribute
+            # Handle attributes
             if self.typ:
                 link_parts.append(f" type=\"{self.typ}\"")
 
-            # Cross origin attribute
             if self.crossorigin:
                 link_parts.append(f" crossorigin=\"{self.crossorigin}\"")
 
-            # Integrity attribute
             if self.integrity:
                 link_parts.append(f" integrity=\"{self.integrity}\"")
 
-            # Referrer policy attribute
             if self.policy:
                 link_parts.append(f" referrerpolicy=\"{self.policy}\"")
 
-            # Fetch priority attribute
             if self.priority:
                 link_parts.append(f" fetchpriority=\"{self.priority}\"")
 
-            # Sizes attribute
             if self.sizes:
                 link_parts.append(f" sizes=\"{self.sizes}\"")
 
-            # Media attribute
             if self.media:
                 link_parts.append(f" media=\"{self.media}\"")
 
-            # Hreflang attribute
             if self.lang:
                 link_parts.append(f" hreflang=\"{self.lang}\"")
 
-            # Title attribute
             if self.title:
                 link_parts.append(f" title=\"{self.title}\"")
 
-            # Block attribute
             if self.block:
                 link_parts.append(f" block=\"{self.block}\"")
 
-            # Disabled attribute
             if self.disabled:
                 link_parts.append(" disabled")
 
@@ -507,15 +498,15 @@ class HipExtension:
 
     # Functions
     def meta(self,
-             name,
+             name=None,
              content=None,
+             charset=None,
              http_equiv=False):
         """Add meta"""
 
-        # Meta tag, http-equiv or normal name=value attributes
-        # If name is charset, content is the charset.
         new_meta = self.Meta(name,
                              content,
+                             charset,
                              http_equiv)
 
         self.metas.append(new_meta)
@@ -526,7 +517,9 @@ class HipExtension:
         """Add meta (http-equiv)"""
 
         # Meta HTTP equiv tag
-        self.meta(name, content, True)
+        self.meta(name,
+                  content,
+                  True)
 
     def noscript(self, msg):
         """Add noscript"""
@@ -545,7 +538,7 @@ class HipExtension:
                crossorigin=None):
         """Add script"""
 
-        # Script (src, type, static URLs or not)
+        # Script
         new_script = self.Script(src,
                                  typ,
                                  static,
@@ -598,7 +591,7 @@ class HipExtension:
              disabled=False):
         """Add link"""
 
-        # Link (href, rel, static URLs or not)
+        # Link
         new_link = self.Link(href,
                              rel,
                              static,
@@ -634,7 +627,7 @@ class HipExtension:
                     disabled=False):
         """Add static link"""
 
-        # Static link to filename
+        # Static Link
         self.link(filename,
                   rel,
                   True,
